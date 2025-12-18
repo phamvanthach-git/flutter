@@ -37,10 +37,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Xử lý khi token hết hạn hoặc lỗi
         if (mounted) {
            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lỗi tải dữ liệu!")));
-           Navigator.pop(context); // Quay về login
+           // Giữ nguyên logic quay về màn hình trước
+           Navigator.pop(context); 
         }
       }
     } catch (e) {
+      // Xử lý lỗi kết nối
       setState(() => _isLoading = false);
     }
   }
@@ -48,8 +50,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Hồ Sơ Chi Tiết")),
-      backgroundColor: Colors.grey[100], // Màu nền nhẹ cho dễ nhìn Card
+      appBar: AppBar(title: const Text("Thông tin User Chi tiết")),
+      backgroundColor: Colors.grey[100], 
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : userData == null
@@ -62,40 +64,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildHeader(),
                       const SizedBox(height: 20),
 
-                      // --- PHẦN 2: THÔNG TIN CƠ BẢN ---
-                      _buildSectionCard("Thông tin cơ bản", [
-                        _infoRow(Icons.person, "Username", userData!['username']),
-                        _infoRow(Icons.cake, "Tuổi / Giới tính", "${userData!['age']} / ${userData!['gender']}"),
+                      // --- PHẦN 2: THÔNG TIN CƠ BẢN (Theo yêu cầu code 1) ---
+                      _buildSectionCard("Thông tin cá nhân", [
+                        _infoRow(Icons.vpn_key, "ID", "${userData!['id']}"),
+                        _infoRow(Icons.person, "First Name", userData!['firstName']),
+                        _infoRow(Icons.person_outline, "Last Name", userData!['lastName']),
+                        // Dữ liệu 'maidenName' an toàn hơn
+                        _infoRow(Icons.face, "Maiden Name", userData!['maidenName'] ?? 'N/A'),
+                        _infoRow(Icons.cake, "Tuổi", "${userData!['age']}"),
+                        _infoRow(Icons.transgender, "Giới tính", userData!['gender']),
                         _infoRow(Icons.calendar_today, "Ngày sinh", userData!['birthDate']),
-                        _infoRow(Icons.water_drop, "Nhóm máu", userData!['bloodGroup']),
-                        _infoRow(Icons.height, "Chiều cao / Cân nặng", "${userData!['height']} cm / ${userData!['weight']} kg"),
                       ]),
 
-                      // --- PHẦN 3: LIÊN HỆ ---
-                      _buildSectionCard("Liên hệ & Địa chỉ", [
+                      // --- PHẦN 3: LIÊN HỆ (Theo yêu cầu code 1) ---
+                      _buildSectionCard("Liên hệ", [
                         _infoRow(Icons.email, "Email", userData!['email']),
-                        _infoRow(Icons.phone, "Số điện thoại", userData!['phone']),
-                        // Địa chỉ là một Object lồng nhau, cần truy cập sâu hơn
-                        _infoRow(Icons.location_on, "Địa chỉ", "${userData!['address']['address']}"),
-                        _infoRow(Icons.location_city, "Thành phố", "${userData!['address']['city']}, ${userData!['address']['state']}"),
-                      ]),
-
-                      // --- PHẦN 4: CÔNG VIỆC ---
-                      _buildSectionCard("Công việc", [
-                        _infoRow(Icons.work, "Công ty", userData!['company']['name']),
-                        _infoRow(Icons.badge, "Chức vụ", userData!['company']['title']),
-                        _infoRow(Icons.domain, "Phòng ban", userData!['company']['department']),
-                      ]),
-
-                      // --- PHẦN 5: TÀI CHÍNH / KHÁC ---
-                      _buildSectionCard("Tài khoản & Ngân hàng", [
-                        _infoRow(Icons.credit_card, "Số thẻ", userData!['bank']['cardNumber']),
-                        _infoRow(Icons.calendar_view_day, "Hết hạn", userData!['bank']['cardExpire']),
-                        _infoRow(Icons.monetization_on, "Loại tiền", userData!['bank']['currency']),
-                        _infoRow(Icons.fingerprint, "User ID", "${userData!['id']}"),
+                        _infoRow(Icons.phone, "Phone", userData!['phone']),
                       ]),
                       
                       const SizedBox(height: 20),
+                      // Nút Đăng Xuất
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -123,14 +111,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           radius: 60,
           backgroundImage: NetworkImage(userData!['image']),
           backgroundColor: Colors.white,
+          onBackgroundImageError: (_, __) {}, // Xử lý lỗi ảnh 
+          child: (userData!['image'] == null) ? const Icon(Icons.person, size: 60) : null,
         ),
         const SizedBox(height: 10),
         Text(
           "${userData!['firstName']} ${userData!['lastName']}",
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
+        // Giữ lại 'Maiden Name' ở đây nếu có
         Text(
-          userData!['maidenName'] ?? "", // Tên thời con gái (nếu có)
+          userData!['maidenName'] ?? "", 
           style: const TextStyle(fontSize: 16, color: Colors.grey, fontStyle: FontStyle.italic),
         ),
       ],
@@ -157,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const Divider(),
-            ...children, // Spread operator để đưa danh sách widget con vào
+            ...children, 
           ],
         ),
       ),
@@ -166,26 +157,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Widget con: Tạo một dòng thông tin (Icon - Label - Value)
   Widget _infoRow(IconData icon, String label, String value) {
+    // Đảm bảo không hiển thị "null" nếu giá trị là null/chuỗi rỗng
+    final displayValue = value.isNotEmpty ? value : "Không có";
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
+          Icon(icon, size: 20, color: Colors.blueGrey),
           const SizedBox(width: 12),
+          SizedBox(
+            width: 120, // Đặt chiều rộng cố định cho Label (giống code 1)
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+            ),
+          ),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                ),
-              ],
+            child: Text(
+              displayValue,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ),
         ],

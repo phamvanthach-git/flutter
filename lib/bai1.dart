@@ -65,7 +65,7 @@ class Bai1 extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'DUONG HUU TIEN',
+                          'THACH',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,

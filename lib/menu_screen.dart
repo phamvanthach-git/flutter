@@ -128,60 +128,84 @@ class MenuScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Menu Bài Tập'),
-        centerTitle: true,
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: exercises.length,
-        itemBuilder: (context, index) {
-          final exercise = exercises[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12.0),
-            elevation: 2.0,
-            child: ListTile(
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: const Color(0xFFF7F8FA),
+
+    // APPBAR CÓ NÚT ☰
+    appBar: AppBar(
+      title: const Text('Menu Bài Tập'),
+      centerTitle: true,
+    ),
+
+    // 👉 MENU TRƯỢT Ở ĐÂY
+    drawer: Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Colors.blue),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                'Danh sách bài tập',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ),
+
+          // 👇 ĐƯA DANH SÁCH BÀI TẬP VÀO DRAWER
+          ...exercises.map((exercise) {
+            return ListTile(
               leading: CircleAvatar(
                 backgroundColor: Colors.blue,
                 child: Text(
                   '${exercise['id']}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
-              title: Text(
-                exercise['title'] as String,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                ),
-              ),
+              title: Text(exercise['title']),
               subtitle: Text(
-                exercise['description'] as String,
-                style: const TextStyle(fontSize: 13.0),
+                exercise['description'],
+                style: const TextStyle(fontSize: 12),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16.0),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 14),
               onTap: () {
-                // Chuyển đến màn hình bài tập tương ứng
+                Navigator.pop(context); // đóng drawer
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ScreenWrapper(
-                      // Lỗi 3 đã được sửa bằng cách thêm required 'title' và 'child' vào ScreenWrapper
-                      title: exercise['title'] as String, 
-                      child: exercise['screen'] as Widget,
+                    builder: (_) => ScreenWrapper(
+                      title: exercise['title'],
+                      child: exercise['screen'],
                     ),
                   ),
                 );
               },
-            ),
-          );
-        },
+            );
+          }).toList(), // ⚠️ BẮT BUỘC CÓ
+        ],
       ),
-    );
-  }
+    ),
+
+    // BODY CHỈ ĐỂ HƯỚNG DẪN
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.menu_open, size: 50, color: Colors.blue),
+          SizedBox(height: 12),
+          Text(
+            'Nhấn ☰ góc trên trái để mở menu',
+            style: TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 }
